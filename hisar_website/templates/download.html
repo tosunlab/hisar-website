@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "partials/components.html" import button, code_block, pill %}
+{% block title %}Download · Hisar{% endblock %}
+{% block description %}Hisar for Mac, the hisar command-line tool, the browser extension and the iPhone app.{% endblock %}
+{% block content %}
+{% set request_access_url = url_for('pages.contact') ~ '#request-access' %}
+<section class="container container-narrow page-header">
+  <h1>Download Hisar</h1>
+  <p class="lede">Hisar is invite-only for now, so downloads are for invited users: your invitation email has the download link and the steps to create your account. Not invited yet? <a href="{{ request_access_url }}">Request access</a>.</p>
+</section>
+
+<section class="container container-narrow">
+  <div class="download-hero">
+    <div class="stack-tight">
+      <h2>Hisar for Mac</h2>
+      <p class="muted">macOS 12 or later. Notarization by Apple is on its way; until then, open it the first time with right-click → Open. Includes the command-line tool and the SSH agent; install it first.</p>
+      <div class="actions">
+        {{ button(request_access_url, 'Get the download link') }}
+      </div>
+      <span class="small muted">The .dmg link comes with your invitation.</span>
+    </div>
+    <div class="stack-tight">
+      <span class="label">Homebrew {{ pill("Coming soon") }}</span>
+      {% call code_block("Homebrew install command, coming soon") -%}
+<span class="code-prompt">$</span> brew install --cask hisar
+      {%- endcall %}
+      <span class="small muted">Not published yet. Until it is, use the .dmg from your invitation.</span>
+    </div>
+  </div>
+</section>
+
+<section class="container container-narrow card-grid download-grid">
+  <article class="info-card">
+    <h2>Command-line tool</h2>
+    <p class="muted">On a Mac, the app installs <code>hisar</code> for you: Settings → Developer tools → Install command-line tool.</p>
+    <p class="muted">A standalone <code>hisar</code> for Linux, Windows, servers and CI is coming soon.</p>
+  </article>
+  <article class="info-card">
+    <h2>Browser extension {{ pill("Coming soon") }}</h2>
+    <p class="muted">Fills logins in Chrome and other Chromium browsers. It talks to the Mac app, so install that first. The store listing isn't public yet.</p>
+  </article>
+  <article class="info-card">
+    <h2>iPhone {{ pill("TestFlight coming soon") }}</h2>
+    <p class="muted">Your vaults, AutoFill, and approvals for requests from your Mac. Invited users get a TestFlight link by email when the beta opens.</p>
+    <span class="small muted">iOS 17 or later</span>
+  </article>
+</section>
+{% endblock %}

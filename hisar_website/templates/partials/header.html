@@ -1,0 +1,12 @@
+{% from "partials/components.html" import brand_mark, button %}
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand" href="{{ url_for('pages.home') }}">{{ brand_mark() }}<span>Hisar</span></a>
+    <nav class="main-nav" aria-label="Main">
+      {% for nav_page, nav_label in [("features", "Features"), ("security", "Security"), ("pricing", "Pricing"), ("download", "Download")] %}
+      <a class="nav-link" href="{{ url_for('pages.' ~ nav_page) }}"{% if page == nav_page %} aria-current="page"{% endif %}>{{ nav_label }}</a>
+      {% endfor %}
+    </nav>
+    {{ button(url_for('pages.contact') ~ '#request-access', 'Request access', size='small') }}
+  </div>
+</header>
