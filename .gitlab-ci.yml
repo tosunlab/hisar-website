@@ -1,15 +1,21 @@
-# Merge requests and manual runs only: a merge to main was already tested as its merge request.
+# Merge requests, release tags and manual runs only: a merge to main was already tested as its merge request.
+# website-<version> tags push reg.tryhisar.com/hisar/website:<version>; the manual website-publish job then points :latest at it.
 workflow:
   auto_cancel:
     on_new_commit: interruptible
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_TAG =~ /^website-\d+\.\d+\.\d+/
     - if: $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api"
 
 default:
   interruptible: true
 
-stages: [test, build]
+variables:
+  REGISTRY: reg.tryhisar.com
+  WEBSITE_IMAGE: reg.tryhisar.com/hisar/website
+
+stages: [test, build, release, publish]
 
 lint-and-test:
   stage: test
@@ -26,11 +32,49 @@ lint-and-test:
     - uv run ruff format --check .
     - uv run pytest -q
 
-# Kaniko builds without a Docker daemon, so the unprivileged runners can check the image builds.
-website-image-build:
-  stage: build
+# Kaniko builds without a Docker daemon, so the unprivileged runners can build the image (linux/amd64, like the server).
+.kaniko:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.2-debug
     entrypoint: [""]
+
+website-image-build:
+  stage: build
+  extends: .kaniko
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - /kaniko/executor --context "$CI_PROJECT_DIR" --dockerfile "$CI_PROJECT_DIR/Dockerfile" --no-push
+
+# A website-1.2.3-label tag is a custom build: it gets its own image tag but can't be published as latest.
+website-image:
+  stage: release
+  extends: .kaniko
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^website-\d+\.\d+\.\d+/
+  interruptible: false
+  script:
+    - test -n "$REGISTRY_USERNAME" && test -n "$REGISTRY_PASSWORD" || { echo "REGISTRY_USERNAME and REGISTRY_PASSWORD come from the hisar group's CI/CD variables"; exit 1; }
+    - version=${CI_COMMIT_TAG#website-}
+    - mkdir -p /kaniko/.docker
+    - printf '{"auths":{"%s":{"auth":"%s"}}}' "$REGISTRY" "$(printf '%s:%s' "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" | base64 | tr -d '\n')" > /kaniko/.docker/config.json
+    - /kaniko/executor --context "$CI_PROJECT_DIR" --dockerfile "$CI_PROJECT_DIR/Dockerfile" --destination "$WEBSITE_IMAGE:$version" --destination "$WEBSITE_IMAGE:sha-$CI_COMMIT_SHORT_SHA"
+    - echo "Pushed $WEBSITE_IMAGE:$version"
+
+# Publishing a website version points :latest and :<major>.<minor> at it.
+website-publish:
+  stage: publish
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  needs: [website-image]
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^website-\d+\.\d+\.\d+$/
+      when: manual
+  interruptible: false
+  script:
+    - echo "$REGISTRY_PASSWORD" | crane auth login "$REGISTRY" -u "$REGISTRY_USERNAME" --password-stdin
+    - version=${CI_COMMIT_TAG#website-}
+    - crane tag "$WEBSITE_IMAGE:$version" "${version%.*}"
+    - crane tag "$WEBSITE_IMAGE:$version" latest
+    - echo "Published $WEBSITE_IMAGE:$version as latest and ${version%.*}"

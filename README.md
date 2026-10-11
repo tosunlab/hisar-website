@@ -37,3 +37,11 @@ docker run --rm -p 8000:8000 hisar-website
 ```
 
 The container runs gunicorn on port 8000 as a non-root user.
+
+## Release
+
+1. `git tag -a website-0.1.0 -m "notes" && git push origin website-0.1.0`: the `website-image` job pushes `reg.tryhisar.com/hisar/website:0.1.0` and `:sha-<commit>` (linux/amd64).
+2. Press **website-publish** in the tag's pipeline to point `:latest` and `:0.1` at it. A custom build (`website-0.1.0-test`) gets its own image tag and can't be published.
+3. On the server: set `HISAR_WEBSITE_VERSION` in `.env` (or keep `latest`), then `docker compose pull website && docker compose up -d website`.
+
+`website-*` tags are protected, because the registry password is a protected group variable.
