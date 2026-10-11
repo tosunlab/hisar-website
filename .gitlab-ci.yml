@@ -19,7 +19,7 @@ stages: [test, build, release, publish]
 
 lint-and-test:
   stage: test
-  image: ghcr.io/astral-sh/uv:0.11.31-python3.14-bookworm-slim
+  image: python:3.14-slim
   variables:
     UV_CACHE_DIR: $CI_PROJECT_DIR/.uv-cache
   cache:
@@ -27,6 +27,7 @@ lint-and-test:
       files: [uv.lock]
     paths: [.uv-cache]
   script:
+    - pip install --quiet uv==0.11.31
     - uv sync --frozen
     - uv run ruff check .
     - uv run ruff format --check .
