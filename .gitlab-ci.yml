@@ -1,0 +1,36 @@
+# Merge requests and manual runs only: a merge to main was already tested as its merge request.
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api"
+
+default:
+  interruptible: true
+
+stages: [test, build]
+
+lint-and-test:
+  stage: test
+  image: ghcr.io/astral-sh/uv:0.11.31-python3.14-bookworm-slim
+  variables:
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.uv-cache
+  cache:
+    key:
+      files: [uv.lock]
+    paths: [.uv-cache]
+  script:
+    - uv sync --frozen
+    - uv run ruff check .
+    - uv run ruff format --check .
+    - uv run pytest -q
+
+# Kaniko builds without a Docker daemon, so the unprivileged runners can check the image builds.
+website-image-build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor --context "$CI_PROJECT_DIR" --dockerfile "$CI_PROJECT_DIR/Dockerfile" --no-push

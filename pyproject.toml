@@ -1,0 +1,26 @@
+[project]
+name = "hisar-website"
+version = "0.1.0"
+description = "tryhisar.com: the Hisar website"
+requires-python = ">=3.14"
+dependencies = [
+    "flask==3.1.2",
+    "gunicorn==23.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==8.4.2",
+    "ruff==0.13.3",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
