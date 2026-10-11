@@ -1,0 +1,25 @@
+{% from "partials/components.html" import brand_mark %}
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-about">
+      <span class="footer-brand">{{ brand_mark() }}Hisar</span>
+      <span class="muted">Made in the Netherlands by Alper Berber.</span>
+      <a href="mailto:{{ site.SUPPORT_EMAIL }}">{{ site.SUPPORT_EMAIL }}</a>
+    </div>
+    <nav class="footer-column" aria-label="Product">
+      <strong>Product</strong>
+      <a href="{{ url_for('pages.features') }}">Features</a>
+      <a href="{{ url_for('pages.pricing') }}">Pricing</a>
+      <a href="{{ url_for('pages.download') }}">Download</a>
+      <a href="{{ url_for('pages.status') }}">Status</a>
+    </nav>
+    <nav class="footer-column" aria-label="Trust">
+      <strong>Trust</strong>
+      <a href="{{ url_for('pages.security') }}">Security</a>
+      <a href="{{ url_for('pages.privacy') }}">Privacy</a>
+      <a href="{{ url_for('pages.terms') }}">Terms</a>
+      <a href="{{ url_for('pages.refunds') }}">Refund policy</a>
+      <a href="{{ url_for('pages.contact') }}">Contact</a>
+    </nav>
+  </div>
+</footer>

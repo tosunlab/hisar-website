@@ -17,8 +17,8 @@ uv run ruff check . && uv run ruff format --check .
 |---|---|
 | `hisar_website/__init__.py` | `create_app()`: settings from the environment, security headers |
 | `hisar_website/pages.py` | One route per page (`ALL_PAGE`) and `/healthz` |
-| `hisar_website/templates/` | `base.html` layout, one template per page, `legal.html` for Terms, Privacy and Refund policy |
-| `hisar_website/static/` | `css/site.css` (Hisar's colour tokens, light and dark) and the favicon |
+| `hisar_website/templates/` | `base.html` layout, one template per page; `partials/` holds the header, footer and shared macros (buttons, code blocks, plan cards, the approval dialog, the legal page layout) |
+| `hisar_website/static/` | `css/site.css` (Hisar's colour tokens, light and dark), `js/pricing.js` (the monthly/yearly toggle) and the favicon |
 
 ## Settings
 
@@ -26,7 +26,7 @@ uv run ruff check . && uv run ruff format --check .
 |---|---|
 | `HISAR_SUPPORT_EMAIL` | `support@tryhisar.com` |
 | `HISAR_APP_URL` | `https://api.tryhisar.com` |
-| `HISAR_PRO_MONTHLY_PRICE` | `€1.99` |
+| `HISAR_PRO_MONTHLY_PRICE` | `€2.49` |
 | `HISAR_PRO_YEARLY_PRICE` | `€19.99` |
 
 ## Run the image
