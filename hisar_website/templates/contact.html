@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Contact · Hisar{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h1>Contact</h1>
+  <p class="lede">Hisar is invite-only for now. To request access, ask a question or get support, email us.</p>
+</section>
+<section class="contact">
+  <p class="email"><a href="mailto:{{ site.SUPPORT_EMAIL }}">{{ site.SUPPORT_EMAIL }}</a></p>
+  <p>We usually answer within two business days. Never send your master password or Secret Key: we will never ask for them.</p>
+</section>
+{% endblock %}

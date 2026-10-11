@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Hisar: secrets for developers{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Agents use your secrets. They never see them.</h1>
+  <p class="lede">Hisar is an end-to-end encrypted password, SSH key and secrets manager for developers. Every time your terminal, your editor or a coding agent asks for a key, Hisar shows you exactly which app is asking, and you approve it on your Mac or your iPhone.</p>
+  <div class="actions">
+    <a class="button primary" href="{{ url_for('pages.pricing') }}">See pricing</a>
+    <a class="button" href="{{ url_for('pages.contact') }}">Request access</a>
+  </div>
+</section>
+<section class="features" aria-label="Features">
+  <article>
+    <h2>SSH agent that names the app</h2>
+    <p>"iTerm2 wants to sign a commit": with the app's icon, the process chain and its code signature. Approve with Touch ID or from your iPhone.</p>
+  </article>
+  <article>
+    <h2>Secrets in your commands, not your files</h2>
+    <p><code>hisar run -- npm test</code> injects secrets from references like <code>hisar://Work/Stripe/api key</code> and masks them in the output.</p>
+  </article>
+  <article>
+    <h2>Built for coding agents</h2>
+    <p><code>hisar mcp</code> lets Claude Code and Cursor run commands with your secrets. They only see vaults you allow, and every use asks you first.</p>
+  </article>
+  <article>
+    <h2>End-to-end encrypted</h2>
+    <p>Your vaults are encrypted on your devices with your master password and Secret Key. The server stores data it can't read.</p>
+  </article>
+</section>
+{% endblock %}
