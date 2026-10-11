@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Pricing · Hisar{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h1>Pricing</h1>
+  <p class="lede">Everything you run on your own Mac is free. Pro pays for what our servers do for you.</p>
+</section>
+<section class="plans" aria-label="Plans">
+  <article class="plan">
+    <h2>Free</h2>
+    <p class="price">€0</p>
+    <ul>
+      <li>Unlimited items and devices, end-to-end encrypted</li>
+      <li>SSH agent with app-named approvals, git commit signing</li>
+      <li><code>hisar run</code>, <code>hisar read</code> and <code>hisar mcp</code></li>
+      <li>Approve Mac requests from your iPhone</li>
+      <li>Share 2 vaults with up to 3 people</li>
+      <li>10 share links at a time, up to 7 days</li>
+      <li>Export your data at any time</li>
+    </ul>
+  </article>
+  <article class="plan featured">
+    <h2>Pro</h2>
+    <p class="price">{{ site.PRO_MONTHLY_PRICE }} <span>per month</span></p>
+    <p class="price-note">or {{ site.PRO_YEARLY_PRICE }} per year. Prices include VAT where applicable.</p>
+    <ul>
+      <li>Everything in Free</li>
+      <li>Unlimited shared vaults, share with up to 10 people</li>
+      <li>200 share links at a time, up to 30 days and 100 views</li>
+      <li>Service accounts for CI (coming soon)</li>
+      <li>Attachments and a year of item history (coming soon)</li>
+      <li>Email support</li>
+    </ul>
+  </article>
+  <article class="plan">
+    <h2>Team</h2>
+    <p class="price">Coming soon</p>
+    <ul>
+      <li>Organization vaults and roles</li>
+      <li>Pooled service accounts and storage</li>
+      <li>Team activity log</li>
+    </ul>
+  </article>
+</section>
+<section class="faq" aria-labelledby="faq-heading">
+  <h2 id="faq-heading">Questions</h2>
+  <h3>What stays free?</h3>
+  <p>End-to-end encryption, the SSH agent and approvals, the command-line tool, coding agent support, iPhone approvals and export are free on every plan.</p>
+  <h3>Can I cancel?</h3>
+  <p>Yes, at any time. Your data stays yours: if a subscription ends, you keep access to everything and can export it. See the <a href="{{ url_for('pages.refunds') }}">refund policy</a>.</p>
+</section>
+{% endblock %}

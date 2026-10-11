@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hisar{% endblock %}</title>
+  <meta name="description" content="{% block description %}End-to-end encrypted password, SSH key and secrets manager for developers.{% endblock %}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main">
+      <a class="brand" href="{{ url_for('pages.home') }}">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8"/><path d="M8 24.5V10.5h3V7.5h2.5v3h5V7.5H21v3h3v14h-6v-5a2 2 0 0 0-4 0v5z"/></svg>
+        <span>Hisar</span>
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('pages.pricing') }}"{% if page == 'pricing' %} aria-current="page"{% endif %}>Pricing</a>
+        <a href="{{ url_for('pages.contact') }}"{% if page == 'contact' %} aria-current="page"{% endif %}>Contact</a>
+      </div>
+    </nav>
+  </header>
+  <main class="site-main">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <span>© Hisar</span>
+    <nav aria-label="Legal">
+      <a href="{{ url_for('pages.terms') }}">Terms</a>
+      <a href="{{ url_for('pages.privacy') }}">Privacy</a>
+      <a href="{{ url_for('pages.refunds') }}">Refund policy</a>
+      <a href="{{ url_for('pages.contact') }}">Contact</a>
+    </nav>
+  </footer>
+</body>
+</html>
