@@ -1,12 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Contact · Hisar{% endblock %}
+{% block description %}Request access to Hisar, get support, or report a security problem.{% endblock %}
 {% block content %}
-<section class="page-header">
-  <h1>Contact</h1>
-  <p class="lede">Hisar is invite-only for now. To request access, ask a question or get support, email us.</p>
+{% set support_email = site.SUPPORT_EMAIL %}
+{% set request_body = "What would you use Hisar for (SSH keys and git signing, secrets for local commands, coding agents, secrets in CI, passwords)?\n\nWhat do you use today?\n\nGitHub or GitLab profile (optional):\n" %}
+<section class="container container-narrow page-header">
+  <h1>Contact and support</h1>
+  <p class="lede">Hisar is made by one developer in the Netherlands. You'll get an answer from the person who wrote the code, usually within two working days. One address for everything: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
 </section>
-<section class="contact">
-  <p class="email"><a href="mailto:{{ site.SUPPORT_EMAIL }}">{{ site.SUPPORT_EMAIL }}</a></p>
-  <p>We usually answer within two business days. Never send your master password or Secret Key: we will never ask for them.</p>
+
+<section id="request-access" class="container container-narrow">
+  <div class="request-access">
+    <div class="stack-tight">
+      <h2>Request access</h2>
+      <p class="muted">Hisar is invite-only while we make sure every new person gets a good first week. We read every request and send invites in small batches.</p>
+      <ul class="detail-list">
+        <li>You'll need a Mac for the app and SSH agent.</li>
+        <li>We'll email you once: the invitation, or a note that it'll take longer.</li>
+        <li>Know someone on Hisar? They can invite you directly from the app.</li>
+      </ul>
+    </div>
+    <div class="stack-tight request-access-action">
+      <p>Email us what you'd use Hisar for and what you use today.</p>
+      <a class="button button-primary button-large" href="mailto:{{ support_email }}?subject=Request%20access&amp;body={{ request_body|urlencode }}">Email a request</a>
+      <span class="small muted">We use your email only to answer your request. <a href="{{ url_for('pages.privacy') }}">Privacy policy</a></span>
+    </div>
+  </div>
+</section>
+
+<section class="container container-narrow contact-grid">
+  <div class="info-card"><strong>Help with the app</strong><span class="muted">Setup, SSH, CLI, agents, sharing.</span><a href="mailto:{{ support_email }}?subject=Support">{{ support_email }}</a></div>
+  <div class="info-card"><strong>Billing and refunds</strong><span class="muted">Invoices, plan changes, <a href="{{ url_for('pages.refunds') }}">refunds</a>.</span><a href="mailto:{{ support_email }}?subject=Billing">{{ support_email }}</a></div>
+  <div id="security-reports" class="info-card"><strong>Security reports</strong><span class="muted">Vulnerabilities and abusive share links. See <a href="{{ url_for('pages.security') }}#report">reporting a vulnerability</a>.</span><a href="mailto:{{ support_email }}?subject=Security%20report">{{ support_email }}</a></div>
+  <div class="info-card"><strong>Privacy</strong><span class="muted">Data requests and questions.</span><a href="mailto:{{ support_email }}?subject=Privacy">{{ support_email }}</a></div>
+</section>
+
+<section class="container container-narrow">
+  <p class="callout"><strong>Please never send us your master password, Secret Key or secrets.</strong> We'll never ask for them. To show us a problem, describe what you did and what happened, and include your app version.</p>
+</section>
+
+<section class="container container-narrow contact-grid section-last">
+  <div class="info-card"><strong>Company details</strong><span class="muted">Hisar is run by Alper Berber, in the Netherlands.<br>Payments are handled by Lemon Squeezy, our reseller and merchant of record.</span></div>
+  <div class="info-card"><strong>Elsewhere</strong><a href="{{ url_for('pages.status') }}">Service status</a><a href="{{ url_for('pages.security') }}">Security model</a><a href="{{ url_for('pages.download') }}">Downloads</a></div>
 </section>
 {% endblock %}

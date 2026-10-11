@@ -1,7 +1,31 @@
-{% extends "legal.html" %}
-{% block title %}Refund Policy · Hisar{% endblock %}
-{% block legal %}
-<h1>Refund Policy</h1>
-<p class="draft-note">Draft. The final policy will replace this page before paid plans open.</p>
-<p>Questions about refunds: <a href="mailto:{{ site.SUPPORT_EMAIL }}">{{ site.SUPPORT_EMAIL }}</a>.</p>
+{% extends "base.html" %}
+{% from "partials/components.html" import legal_document with context %}
+{% block title %}Refund policy · Hisar{% endblock %}
+{% block main_class %}site-main legal-main{% endblock %}
+{% block content %}
+{% call legal_document("Refund policy", "Effective 11 October 2026") %}
+<p class="legal-intro">Changed your mind? Ask within 14 days of your first payment and you get it back in full. No questions, no forms.</p>
+
+<div class="legal-cards">
+  <div class="info-card"><strong>Monthly, {{ site.PRO_MONTHLY_PRICE }}</strong><span class="muted">Full refund within 14 days of your first payment.</span></div>
+  <div class="info-card"><strong>Yearly, {{ site.PRO_YEARLY_PRICE }}</strong><span class="muted">Full refund within 14 days of your first payment.</span></div>
+  <div class="info-card"><strong>Renewals</strong><span class="muted">Not refunded. Cancel any time to stop the next renewal; Pro stays until the end of the period you paid for.</span></div>
+</div>
+
+<h2>How to ask</h2>
+<ol>
+  <li>Email <a href="mailto:{{ site.SUPPORT_EMAIL }}?subject=Refund">{{ site.SUPPORT_EMAIL }}</a> from your account's address, or reply to your receipt.</li>
+  <li>Payments are handled by Lemon Squeezy, our reseller and merchant of record, so the refund is issued by Lemon Squeezy. You can also ask through the order email Lemon Squeezy sent you.</li>
+  <li>The refund goes back to your original payment method. How long it takes to show up depends on your bank or card issuer.</li>
+</ol>
+
+<h2>What happens to your account</h2>
+<p>Your account moves to Free right away. Nothing is deleted: everything you stored stays readable, usable and exportable. If you're above Free's limits, you can't add more until you're back within them.</p>
+
+<h2>Your legal right of withdrawal</h2>
+<p>If you are a consumer in the EU, you have a 14-day right of withdrawal for digital services. This policy gives you a full refund within 14 days of your first payment whether or not you've used Pro, and nothing in it limits your rights under mandatory consumer law.</p>
+
+<h2>Outside 14 days</h2>
+<p>If something went wrong on our side, such as a double charge or an outage that kept you from using Pro, write to us and we'll make it right.</p>
+{% endcall %}
 {% endblock %}

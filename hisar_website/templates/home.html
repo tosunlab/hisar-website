@@ -1,30 +1,152 @@
 {% extends "base.html" %}
+{% from "partials/components.html" import approval_dialog, button, code_block, terminal_icon %}
 {% block title %}Hisar: secrets for developers{% endblock %}
+{% block main_class %}site-main home{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>Agents use your secrets. They never see them.</h1>
-  <p class="lede">Hisar is an end-to-end encrypted password, SSH key and secrets manager for developers. Every time your terminal, your editor or a coding agent asks for a key, Hisar shows you exactly which app is asking, and you approve it on your Mac or your iPhone.</p>
-  <div class="actions">
-    <a class="button primary" href="{{ url_for('pages.pricing') }}">See pricing</a>
-    <a class="button" href="{{ url_for('pages.contact') }}">Request access</a>
+<section class="container hero">
+  <div class="hero-text">
+    <span class="eyebrow">Invite-only beta · Mac, CLI, iPhone</span>
+    <h1>Agents use your secrets. They never see them.</h1>
+    <p class="lede">Hisar is an end-to-end encrypted password, SSH-key and secrets manager for developers. Every signature, <code>hisar run</code> and agent request names the app that asks, with its icon, process chain and code signature, before a key is used.</p>
+    <div class="actions">
+      {{ button(url_for('pages.contact') ~ '#request-access', 'Request access') }}
+      {{ button(url_for('pages.features'), 'See how it works', 'secondary') }}
+    </div>
+    <span class="small muted">Free for one developer. Already invited? <a href="{{ url_for('pages.download') }}">Download for Mac</a></span>
+  </div>
+  {{ approval_dialog() }}
+</section>
+
+<section class="band" aria-label="In short">
+  <div class="container band-grid">
+    <div class="band-item"><strong>Our server stores ciphertext</strong><span>Keys come from your master password and a Secret Key that never leaves your devices.</span></div>
+    <div class="band-item"><strong>Approved by you, by name</strong><span>Touch ID on your Mac, or a signed approval from your iPhone.</span></div>
+    <div class="band-item"><strong>Post-quantum key exchange</strong><span>Vault keys are wrapped with hybrid ML-KEM-768 + X25519.</span></div>
   </div>
 </section>
-<section class="features" aria-label="Features">
-  <article>
-    <h2>SSH agent that names the app</h2>
-    <p>"iTerm2 wants to sign a commit": with the app's icon, the process chain and its code signature. Approve with Touch ID or from your iPhone.</p>
+
+<section class="container split split-first">
+  <div class="split-text">
+    <span class="eyebrow">SSH agent and git signing</span>
+    <h2>Your SSH keys live in Hisar. Every use asks first.</h2>
+    <p>Point <code>SSH_AUTH_SOCK</code> at Hisar and keep using ssh, git and your editor. The dialog tells you which app is asking, the processes behind it, who signed it, and what it wants to do: the host, or the commit you're signing. An unsigned binary says so, loudly.</p>
+    <a class="strong-link" href="{{ url_for('pages.features') }}#ssh">How the SSH agent works</a>
+  </div>
+  <ul class="request-list" aria-label="Example approval requests">
+    <li class="request">
+      {{ terminal_icon("small") }}
+      <span class="request-text"><strong>iTerm2 wants to sign a commit</strong><span class="mono-detail">ssh-keygen ← git ← zsh · Signed by Example Labs</span></span>
+    </li>
+    <li class="request">
+      <span class="request-icon request-icon-editor" aria-hidden="true">&lt;/&gt;</span>
+      <span class="request-text"><strong>Visual Studio Code wants to use “GitHub”</strong><span class="mono-detail">ssh ← git ← Code Helper · git@github.com</span></span>
+    </li>
+    <li class="request request-warning">
+      <span class="request-icon request-icon-warning" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></svg></span>
+      <span class="request-text"><strong>./deploy-tool wants to use “prod-bastion”</strong><span class="mono-detail">Not signed. Hisar can't tell who made this program.</span></span>
+    </li>
+  </ul>
+</section>
+
+<section class="container split">
+  <div class="split-text">
+    <span class="eyebrow">hisar run</span>
+    <h2>Commit the .env. It holds no secrets.</h2>
+    <p>Name a secret with a <code>hisar://</code> reference instead of pasting it. <code>hisar run</code> resolves every reference in one request, you approve once, and the command gets the real values in its environment. Nothing is written to disk, and any value it prints comes out concealed.</p>
+  </div>
+  <div class="stack">
+    {% call code_block("Example .env file", "light") -%}
+<span class="code-comment"># .env</span>
+DATABASE_URL=postgres://localhost:5432/app
+DATABASE_PASSWORD=hisar://Work/Postgres%20staging/password
+GITHUB_TOKEN=hisar://Personal/GitHub/API%20token
+    {%- endcall %}
+    {% call code_block("Running a command with hisar run") -%}
+<span class="code-prompt">$</span> hisar run --env-file .env -- npm test
+<span class="code-comment">connecting as app with password &lt;concealed by hisar&gt;</span>
+✓ 214 passed
+    {%- endcall %}
+  </div>
+</section>
+
+<section class="container split">
+  <div class="split-text">
+    <span class="eyebrow">hisar mcp</span>
+    <h2>Give your coding agent the keys to run, not to read.</h2>
+    <p>Turn on “Available to agents” for the vaults an agent may use. It finds items by metadata and runs your tests, migrations and deploys with secrets in the environment. You approve each command in Hisar; what comes back to the agent is masked.</p>
+    <p class="small muted">Masking is a safety net, not a sandbox: an approved command has the real values. Approve only commands you would run yourself.</p>
+  </div>
+  <div class="stack">
+    {% call code_block("Adding Hisar to Claude Code") -%}
+<span class="code-prompt">$</span> claude mcp add hisar -- hisar mcp
+    {%- endcall %}
+    <div class="tool-call">
+      <span class="tool-call-name">run_with_secrets</span>
+      <span>["npm", "run", "migrate"]  in ~/src/shop</span>
+      <span class="muted">Secrets: DATABASE_PASSWORD · Approved in Hisar</span>
+      <span class="tool-call-result">→ applied 3 migrations as &lt;concealed by hisar&gt;</span>
+    </div>
+  </div>
+</section>
+
+<section class="container card-grid">
+  <article class="feature-card">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+    <h3>Approve from your iPhone</h3>
+    <p>Away from the keyboard? The request shows up on your phone, end-to-end encrypted and signed. The phone approves; it can never unlock your Mac.</p>
   </article>
-  <article>
-    <h2>Secrets in your commands, not your files</h2>
-    <p><code>hisar run -- npm test</code> injects secrets from references like <code>hisar://Work/Stripe/api key</code> and masks them in the output.</p>
+  <article class="feature-card">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+    <h3>Share links</h3>
+    <p>Send one login to someone without Hisar. The key stays in the link; set an expiry, a view limit and an optional passphrase.</p>
   </article>
-  <article>
-    <h2>Built for coding agents</h2>
-    <p><code>hisar mcp</code> lets Claude Code and Cursor run commands with your secrets. They only see vaults you allow, and every use asks you first.</p>
+  <article class="feature-card">
+    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg>
+    <h3>Shared vaults</h3>
+    <p>Invite a person by email to a vault. Their device gets the vault key, wrapped to their public key; we never hold it in the clear.</p>
   </article>
-  <article>
-    <h2>End-to-end encrypted</h2>
-    <p>Your vaults are encrypted on your devices with your master password and Secret Key. The server stores data it can't read.</p>
-  </article>
+</section>
+
+<section class="container">
+  <div class="dark-panel">
+    <div class="stack">
+      <h2>We store ciphertext. It's all we can store.</h2>
+      <p>Item titles, URLs and vault names are encrypted too. We see your email, your devices and when things change. A database dump without your Secret Key is useless, even to someone with a quantum computer later.</p>
+      <a class="strong-link" href="{{ url_for('pages.security') }}">Read the security model</a>
+    </div>
+    <dl class="spec-list">
+      <dt>Sign-in</dt><dd>OPAQUE (RFC 9807)</dd>
+      <dt>Stretching</dt><dd>Argon2id + 128-bit Secret Key</dd>
+      <dt>Items</dt><dd>XChaCha20-Poly1305</dd>
+      <dt>Vault keys</dt><dd>HPKE, ML-KEM-768 + X25519</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="container pricing-teaser">
+  <h2>Free for one developer.</h2>
+  <div class="teaser-grid">
+    <div class="teaser-card">
+      <strong>Free</strong>
+      <span class="teaser-price">€0</span>
+      <span class="muted">SSH agent, approvals, git signing, hisar run, hisar mcp and iPhone approvals. Unlimited items and devices.</span>
+    </div>
+    <div class="teaser-card">
+      <strong>Pro</strong>
+      <span class="teaser-price">{{ site.PRO_MONTHLY_PRICE }}/month <span class="muted">or {{ site.PRO_YEARLY_PRICE }}/year</span></span>
+      <span class="muted">More sharing and share links today. CI service accounts, attachments and a year of history are on the way.</span>
+    </div>
+  </div>
+  <a class="strong-link" href="{{ url_for('pages.pricing') }}">Compare plans</a>
+</section>
+
+<section class="band band-cta">
+  <div class="container cta-row">
+    <div class="stack-tight">
+      <h2>Hisar is invite-only for now.</h2>
+      <p class="muted">Tell us what you'd use it for. We read every request and send invites in small batches.</p>
+    </div>
+    {{ button(url_for('pages.contact') ~ '#request-access', 'Request access') }}
+  </div>
 </section>
 {% endblock %}
