@@ -1,152 +1,217 @@
 {% extends "base.html" %}
-{% from "partials/components.html" import approval_dialog, button, code_block, terminal_icon %}
-{% block title %}Hisar: secrets for developers{% endblock %}
+{% from "partials/components.html" import approval_dialog, button, code_block, icon %}
+{% block title %}Hisar, open-source secrets manager{% endblock %}
+{% block description %}Hisar is an open-source, end-to-end encrypted password, SSH key and secrets manager for developers. Run the server yourself.{% endblock %}
 {% block main_class %}site-main home{% endblock %}
 {% block content %}
+{% set repository_url = site.REPOSITORY_URL %}
 <section class="container hero">
   <div class="hero-text">
-    <span class="eyebrow">Invite-only beta · Mac, CLI, iPhone</span>
-    <h1>Agents use your secrets. They never see them.</h1>
-    <p class="lede">Hisar is an end-to-end encrypted password, SSH-key and secrets manager for developers. Every signature, <code>hisar run</code> and agent request names the app that asks, with its icon, process chain and code signature, before a key is used.</p>
+    <span class="eyebrow">Open source · AGPL-3.0 · Self-hosted</span>
+    <h1>Your passwords, SSH keys and secrets. On your server.</h1>
+    <p class="lede">Hisar is an end-to-end encrypted password, SSH key and secrets manager for developers. Run the server yourself, connect the Mac app, the CLI, the iPhone app and the browser extension, and read every line of code that touches your keys.</p>
     <div class="actions">
-      {{ button(url_for('pages.contact') ~ '#request-access', 'Request access') }}
-      {{ button(url_for('pages.features'), 'See how it works', 'secondary') }}
+      {{ button('#self-host', 'Self-host Hisar') }}
+      {{ button(repository_url, 'View the source', 'secondary') }}
     </div>
-    <span class="small muted">Free for one developer. Already invited? <a href="{{ url_for('pages.download') }}">Download for Mac</a></span>
+    {% call code_block("Clone the repository", "light") -%}
+<span class="code-prompt">$</span> git clone {{ repository_url }}
+    {%- endcall %}
   </div>
   {{ approval_dialog() }}
 </section>
 
 <section class="band" aria-label="In short">
   <div class="container band-grid">
-    <div class="band-item"><strong>Our server stores ciphertext</strong><span>Keys come from your master password and a Secret Key that never leaves your devices.</span></div>
-    <div class="band-item"><strong>Approved by you, by name</strong><span>Touch ID on your Mac, or a signed approval from your iPhone.</span></div>
-    <div class="band-item"><strong>Post-quantum key exchange</strong><span>Vault keys are wrapped with hybrid ML-KEM-768 + X25519.</span></div>
+    <div class="summary-item"><strong>Your server holds ciphertext</strong><span>Keys come from your master password and a Secret Key that never leave your devices.</span></div>
+    <div class="summary-item"><strong>Every key use asks, by name</strong><span>Touch ID on your Mac, or a signed approval from your iPhone.</span></div>
+    <div class="summary-item"><strong>Nothing to take on trust</strong><span>Clients, server and the crypto design are all in one public repository.</span></div>
   </div>
 </section>
 
-<section class="container split split-first">
-  <div class="split-text">
-    <span class="eyebrow">SSH agent and git signing</span>
-    <h2>Your SSH keys live in Hisar. Every use asks first.</h2>
-    <p>Point <code>SSH_AUTH_SOCK</code> at Hisar and keep using ssh, git and your editor. The dialog tells you which app is asking, the processes behind it, who signed it, and what it wants to do: the host, or the commit you're signing. An unsigned binary says so, loudly.</p>
-    <a class="strong-link" href="{{ url_for('pages.features') }}#ssh">How the SSH agent works</a>
+<section id="features" class="container features">
+  <div class="section-heading">
+    <span class="eyebrow">What it does</span>
+    <h2>Built for the terminal, not just the browser.</h2>
   </div>
-  <ul class="request-list" aria-label="Example approval requests">
-    <li class="request">
-      {{ terminal_icon("small") }}
-      <span class="request-text"><strong>iTerm2 wants to sign a commit</strong><span class="mono-detail">ssh-keygen ← git ← zsh · Signed by Example Labs</span></span>
-    </li>
-    <li class="request">
-      <span class="request-icon request-icon-editor" aria-hidden="true">&lt;/&gt;</span>
-      <span class="request-text"><strong>Visual Studio Code wants to use “GitHub”</strong><span class="mono-detail">ssh ← git ← Code Helper · git@github.com</span></span>
-    </li>
-    <li class="request request-warning">
-      <span class="request-icon request-icon-warning" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></svg></span>
-      <span class="request-text"><strong>./deploy-tool wants to use “prod-bastion”</strong><span class="mono-detail">Not signed. Hisar can't tell who made this program.</span></span>
-    </li>
+  <div class="card-grid">
+    <article class="card">
+      <span class="eyebrow">SSH agent and git signing</span>
+      <h3>Your SSH keys live in Hisar. Every use asks first.</h3>
+      <p>Point <code>SSH_AUTH_SOCK</code> at Hisar and keep using ssh, git and your editor. The dialog names the app, the processes behind it, who signed it, and the host or commit. Unsigned programs are flagged.</p>
+      {% call code_block("Point SSH at the Hisar agent", "light", compact=True) -%}
+export SSH_AUTH_SOCK=~/.hisar/agent.sock
+      {%- endcall %}
+    </article>
+    <article class="card">
+      <span class="eyebrow">hisar run</span>
+      <h3>Commit the .env. It holds no secrets.</h3>
+      <p>Write <code>hisar://</code> references instead of values. <code>hisar run</code> resolves them in one request, you approve once, and the command gets real values. Nothing is written to disk, and printed values come out concealed.</p>
+      {% call code_block("Running a command with hisar run", compact=True) -%}
+<span class="code-prompt">$</span> hisar run --env-file .env -- npm test
+<span class="code-comment">password &lt;concealed by hisar&gt;</span>
+      {%- endcall %}
+    </article>
+    <article class="card">
+      <span class="eyebrow">hisar mcp</span>
+      <h3>Coding agents use your secrets. They never see them.</h3>
+      <p>Mark the vaults an agent may use. It runs tests, migrations and deploys with secrets in the environment; you approve each command, and output is masked. Masking is a safety net, not a sandbox.</p>
+      {% call code_block("Adding Hisar to Claude Code", compact=True) -%}
+<span class="code-prompt">$</span> claude mcp add hisar -- hisar mcp
+      {%- endcall %}
+    </article>
+  </div>
+  <ul class="icon-list">
+    <li>{{ icon('phone') }}<span><strong>Approve from your iPhone.</strong> <span>Requests arrive end-to-end encrypted and signed. The phone approves; it can't unlock your Mac.</span></span></li>
+    <li>{{ icon('link') }}<span><strong>Share links.</strong> <span>Send one login to someone without Hisar, with an expiry, a view limit and an optional passphrase.</span></span></li>
+    <li>{{ icon('people') }}<span><strong>Shared vaults.</strong> <span>Invite people on your server to a vault. Its key is wrapped to each member's public key.</span></span></li>
+    <li>{{ icon('browser') }}<span><strong>Browser autofill.</strong> <span>Fills logins in Chrome, Arc, Brave and Edge through the Mac app.</span></span></li>
   </ul>
 </section>
 
-<section class="container split">
-  <div class="split-text">
-    <span class="eyebrow">hisar run</span>
-    <h2>Commit the .env. It holds no secrets.</h2>
-    <p>Name a secret with a <code>hisar://</code> reference instead of pasting it. <code>hisar run</code> resolves every reference in one request, you approve once, and the command gets the real values in its environment. Nothing is written to disk, and any value it prints comes out concealed.</p>
-  </div>
-  <div class="stack">
-    {% call code_block("Example .env file", "light") -%}
-<span class="code-comment"># .env</span>
-DATABASE_URL=postgres://localhost:5432/app
-DATABASE_PASSWORD=hisar://Work/Postgres%20staging/password
-GITHUB_TOKEN=hisar://Personal/GitHub/API%20token
-    {%- endcall %}
-    {% call code_block("Running a command with hisar run") -%}
-<span class="code-prompt">$</span> hisar run --env-file .env -- npm test
-<span class="code-comment">connecting as app with password &lt;concealed by hisar&gt;</span>
-✓ 214 passed
-    {%- endcall %}
-  </div>
-</section>
-
-<section class="container split">
-  <div class="split-text">
-    <span class="eyebrow">hisar mcp</span>
-    <h2>Give your coding agent the keys to run, not to read.</h2>
-    <p>Turn on “Available to agents” for the vaults an agent may use. It finds items by metadata and runs your tests, migrations and deploys with secrets in the environment. You approve each command in Hisar; what comes back to the agent is masked.</p>
-    <p class="small muted">Masking is a safety net, not a sandbox: an approved command has the real values. Approve only commands you would run yourself.</p>
-  </div>
-  <div class="stack">
-    {% call code_block("Adding Hisar to Claude Code") -%}
-<span class="code-prompt">$</span> claude mcp add hisar -- hisar mcp
-    {%- endcall %}
-    <div class="tool-call">
-      <span class="tool-call-name">run_with_secrets</span>
-      <span>["npm", "run", "migrate"]  in ~/src/shop</span>
-      <span class="muted">Secrets: DATABASE_PASSWORD · Approved in Hisar</span>
-      <span class="tool-call-result">→ applied 3 migrations as &lt;concealed by hisar&gt;</span>
-    </div>
-  </div>
-</section>
-
-<section class="container card-grid">
-  <article class="feature-card">
-    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
-    <h3>Approve from your iPhone</h3>
-    <p>Away from the keyboard? The request shows up on your phone, end-to-end encrypted and signed. The phone approves; it can never unlock your Mac.</p>
-  </article>
-  <article class="feature-card">
-    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
-    <h3>Share links</h3>
-    <p>Send one login to someone without Hisar. The key stays in the link; set an expiry, a view limit and an optional passphrase.</p>
-  </article>
-  <article class="feature-card">
-    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg>
-    <h3>Shared vaults</h3>
-    <p>Invite a person by email to a vault. Their device gets the vault key, wrapped to their public key; we never hold it in the clear.</p>
-  </article>
-</section>
-
-<section class="container">
+<section id="self-host" class="container self-host">
   <div class="dark-panel">
-    <div class="stack">
-      <h2>We store ciphertext. It's all we can store.</h2>
-      <p>Item titles, URLs and vault names are encrypted too. We see your email, your devices and when things change. A database dump without your Secret Key is useless, even to someone with a quantum computer later.</p>
-      <a class="strong-link" href="{{ url_for('pages.security') }}">Read the security model</a>
+    <div class="section-heading">
+      <span class="eyebrow">Self-host</span>
+      <h2>One server, three steps.</h2>
+      <p>The server only syncs encrypted data between your devices, so it needs little: a small Linux machine with Docker, where it runs next to Postgres. Everyone who uses it creates an account on your instance with an invite from you.</p>
     </div>
-    <dl class="spec-list">
-      <dt>Sign-in</dt><dd>OPAQUE (RFC 9807)</dd>
-      <dt>Stretching</dt><dd>Argon2id + 128-bit Secret Key</dd>
-      <dt>Items</dt><dd>XChaCha20-Poly1305</dd>
-      <dt>Vault keys</dt><dd>HPKE, ML-KEM-768 + X25519</dd>
+    <ol class="step-list">
+      <li class="step">
+        <span class="step-number">01</span>
+        <strong>Start the server</strong>
+        {% call code_block("Start the server with Docker Compose", compact=True) -%}
+<span class="code-prompt">$</span> git clone {{ repository_url }}
+<span class="code-prompt">$</span> cd hisar/deploy
+<span class="code-prompt">$</span> docker compose up -d
+        {%- endcall %}
+        <span class="step-caption">Set your domain and a database password first; <code>deploy/README.md</code> walks through it.</span>
+      </li>
+      <li class="step">
+        <span class="step-number">02</span>
+        <strong>Put it behind HTTPS</strong>
+        {% call code_block("Caddy reverse proxy configuration", compact=True) -%}
+<span class="code-comment"># Caddyfile</span>
+hisar.example.com {
+  reverse_proxy localhost:8080
+}
+        {%- endcall %}
+        <span class="step-caption">Any reverse proxy with a valid certificate works: Caddy, nginx, Traefik.</span>
+      </li>
+      <li class="step">
+        <span class="step-number">03</span>
+        <strong>Point the apps at it</strong>
+        {% call code_block("Choosing your server at sign-in", compact=True) -%}
+Sign in → Use a different server…
+https://hisar.example.com
+        {%- endcall %}
+        <span class="step-caption">The Mac app, iPhone app and CLI all take your server's address at sign-in.</span>
+      </li>
+    </ol>
+    <div class="panel-notes">
+      <div class="summary-item"><strong>Back it up</strong><span>Backups only hold ciphertext, but they're still the only copy of your server's state.</span></div>
+      <div class="summary-item"><strong>Keep it updated</strong><span>Watch the repository's releases and update the server before the apps.</span></div>
+      <div class="summary-item"><strong>No recovery, by design</strong><span>Neither you nor your server can reset a lost master password. Print the Emergency Kit.</span></div>
+    </div>
+    <a class="strong-link" href="{{ repository_url }}/blob/main/deploy/README.md">Configuration reference on GitHub</a>
+  </div>
+</section>
+
+<section class="container security-summary">
+  <div class="section-heading">
+    <span class="eyebrow">Security model</span>
+    <h2>Running the server doesn't let you read the vaults.</h2>
+    <p>Keys are made on each device. Even the person who runs the server, you included, only sees what's on the left.</p>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <h3>What the server sees</h3>
+      <ul class="card-list">
+        <li>Account emails, and who can open which vault</li>
+        <li>Item counts, sizes and when they change</li>
+        <li>Devices, IP addresses and app versions</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>What it never sees</h3>
+      <ul class="card-list">
+        <li>Passwords, notes, one-time code seeds, SSH private keys</li>
+        <li>Item titles, URLs and vault names</li>
+        <li>Master passwords, Secret Keys, and the key in a share link</li>
+      </ul>
+    </div>
+    <div class="card card-alt">
+      <h3>Cryptography</h3>
+      <dl class="spec-list">
+        <dt>Sign-in</dt><dd>OPAQUE (RFC 9807)</dd>
+        <dt>Stretching</dt><dd>Argon2id + Secret Key</dd>
+        <dt>Items</dt><dd>XChaCha20-Poly1305</dd>
+        <dt>Vault keys</dt><dd>HPKE, ML-KEM-768 + X25519</dd>
+        <dt>Signatures</dt><dd>Ed25519</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="inline-row">
+    <a class="strong-link" href="{{ url_for('pages.security') }}">Full security model</a>
+    <span>Found a vulnerability? Email <a href="mailto:{{ site.SUPPORT_EMAIL }}?subject=Security%20report">{{ site.SUPPORT_EMAIL }}</a> rather than opening a public issue.</span>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container downloads">
+    <div class="section-heading">
+      <span class="eyebrow">Download</span>
+      <h2>Get the apps.</h2>
+      <p>Builds for every platform are attached to the GitHub releases, with checksums for the command-line tool. You can also build any of them from source.</p>
+      <a class="strong-link" href="{{ url_for('pages.download') }}">All downloads and checksums</a>
+    </div>
+    <div class="download-grid">
+      <a class="download-card" href="{{ repository_url }}/releases">
+        <strong>Mac</strong>
+        <span>The app, the SSH agent and the <code>hisar</code> CLI. macOS 12 or later.</span>
+        <span class="download-card-action">.dmg →</span>
+      </a>
+      <a class="download-card" href="{{ repository_url }}/releases">
+        <strong>Command line</strong>
+        <span>Standalone <code>hisar</code> for Linux, macOS and Windows, on desktops and servers.</span>
+        <span class="download-card-action">.tar.gz · .zip →</span>
+      </a>
+      <a class="download-card" href="{{ repository_url }}/releases">
+        <strong>Browser extension</strong>
+        <span>Chrome, Arc, Brave and Edge. Talks to the Mac app, so install that first.</span>
+        <span class="download-card-action">.zip →</span>
+      </a>
+      <a class="download-card" href="{{ repository_url }}/tree/main/mobile/ios">
+        <strong>iPhone</strong>
+        <span>Your vaults and approvals for your Mac. Build it with Xcode for now.</span>
+        <span class="download-card-action">Build from source →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="container contribute">
+  <div class="section-heading">
+    <span class="eyebrow">Contribute</span>
+    <h2>Built in the open.</h2>
+    <p>Bug reports, fixes, translations and reviews of the crypto are all welcome. Start with the design document, or pick an issue labelled “good first issue”.</p>
+    <div class="actions">
+      {{ button(repository_url ~ '/issues', 'Open issues', size='medium') }}
+      {{ button(repository_url ~ '/blob/main/docs/DESIGN.md', 'Design document', 'secondary', 'medium') }}
+    </div>
+  </div>
+  <div class="file-tree">
+    <div class="file-tree-title">hisar/</div>
+    <dl>
+      <dt>core/</dt><dd>Shared vault and crypto code</dd>
+      <dt>server/</dt><dd>Sync server, in Go</dd>
+      <dt>desktop/</dt><dd>Mac app and SSH agent</dd>
+      <dt>cli/</dt><dd>The hisar command</dd>
+      <dt>mobile/</dt><dd>iPhone app</dd>
+      <dt>extension/</dt><dd>Browser extension</dd>
+      <dt>deploy/</dt><dd>Docker Compose setup for the server</dd>
+      <dt>docs/</dt><dd>Design document and copy guide</dd>
     </dl>
-  </div>
-</section>
-
-<section class="container pricing-teaser">
-  <h2>Free for one developer.</h2>
-  <div class="teaser-grid">
-    <div class="teaser-card">
-      <strong>Free</strong>
-      <span class="teaser-price">€0</span>
-      <span class="muted">SSH agent, approvals, git signing, hisar run, hisar mcp and iPhone approvals. Unlimited items and devices.</span>
-    </div>
-    <div class="teaser-card">
-      <strong>Pro</strong>
-      <span class="teaser-price">{{ site.PRO_MONTHLY_PRICE }}/month <span class="muted">or {{ site.PRO_YEARLY_PRICE }}/year</span></span>
-      <span class="muted">More sharing and share links today. CI service accounts, attachments and a year of history are on the way.</span>
-    </div>
-  </div>
-  <a class="strong-link" href="{{ url_for('pages.pricing') }}">Compare plans</a>
-</section>
-
-<section class="band band-cta">
-  <div class="container cta-row">
-    <div class="stack-tight">
-      <h2>Hisar is invite-only for now.</h2>
-      <p class="muted">Tell us what you'd use it for. We read every request and send invites in small batches.</p>
-    </div>
-    {{ button(url_for('pages.contact') ~ '#request-access', 'Request access') }}
   </div>
 </section>
 {% endblock %}

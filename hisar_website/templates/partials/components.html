@@ -2,44 +2,24 @@
 <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8"/><path d="M8 24.5V10.5h3V7.5h2.5v3h5V7.5H21v3h3v14h-6v-5a2 2 0 0 0-4 0v5z"/></svg>
 {%- endmacro %}
 
-{% macro button(href, label, variant="primary", size="large") -%}
-<a class="button button-{{ variant }} button-{{ size }}" href="{{ href }}">{{ label }}</a>
+{% macro icon(name) -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ '2' if name in ('star', 'download') else '1.8' }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if name == "star" %}<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/>
+{%- elif name == "download" %}<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>
+{%- elif name == "phone" %}<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>
+{%- elif name == "link" %}<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>
+{%- elif name == "people" %}<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>
+{%- elif name == "browser" %}<rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8"/>
+{%- endif -%}
+</svg>
 {%- endmacro %}
 
-{% macro pill(label) -%}
-<span class="pill">{{ label }}</span>
+{% macro button(href, label, variant="primary", size="large", icon_name=None) -%}
+<a class="button button-{{ variant }} button-{{ size }}" href="{{ href }}">{% if icon_name %}{{ icon(icon_name) }}{% endif %}{{ label }}</a>
 {%- endmacro %}
 
-{% macro terminal_icon(size="large") -%}
-<span class="terminal-icon terminal-icon-{{ size }}" aria-hidden="true">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5"/><path d="M12 18h7"/></svg>
-</span>
-{%- endmacro %}
-
-{% macro code_block(label=None, tone="dark") -%}
-<pre class="code-block code-block-{{ tone }}"{% if label %} aria-label="{{ label }}"{% endif %} tabindex="0"><code>{{ caller() }}</code></pre>
-{%- endmacro %}
-
-{% macro page_header(title, eyebrow=None) -%}
-<section class="container page-header">
-  {% if eyebrow %}<span class="eyebrow">{{ eyebrow }}</span>{% endif %}
-  <h1>{{ title }}</h1>
-  {{ caller() }}
-</section>
-{%- endmacro %}
-
-{% macro plan_card(title, tagline, cta_href, cta_label, all_feature, variant="default", badge=None) -%}
-<article class="plan-card plan-card-{{ variant }}">
-  <header class="plan-heading">
-    <h2>{{ title }}{% if badge %} {{ pill(badge) }}{% endif %}</h2>
-    <span class="muted">{{ tagline }}</span>
-  </header>
-  {{ caller() }}
-  {{ button(cta_href, cta_label, "primary" if variant == "featured" else "secondary") }}
-  <ul class="plan-features">
-    {% for feature in all_feature %}<li>{{ feature }}</li>{% endfor %}
-  </ul>
-</article>
+{% macro code_block(label=None, tone="dark", compact=False) -%}
+<pre class="code-block code-block-{{ tone }}{% if compact %} code-block-compact{% endif %}"{% if label %} aria-label="{{ label }}"{% endif %} tabindex="0"><code>{{ caller() }}</code></pre>
 {%- endmacro %}
 
 {% macro approval_dialog() -%}
@@ -48,7 +28,7 @@
     <div class="approval-body">
       <div class="approval-summary">
         <div class="approval-icon">
-          {{ terminal_icon() }}
+          <span class="terminal-icon" aria-hidden="true">$_</span>
           <span class="approval-badge">{{ brand_mark() }}</span>
         </div>
         <div class="approval-text">
@@ -61,13 +41,13 @@
           <span class="approval-chain">ssh-keygen ← git ← zsh</span>
           <span class="approval-signature">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
-            Signed by Example Labs (8XQ2K7ZB4N)
+            Signed by George Nachman (H7V7XYVQ7D)
           </span>
         </div>
       </div>
       <div class="approval-detail">
         <span>“Ask before every SSH signature”</span>
-        <span class="approval-detail-secondary">~/src/hisar/core · desktop/ssh-approval-redesign</span>
+        <span class="approval-detail-secondary">~/src/hisar · main</span>
       </div>
     </div>
     <div class="approval-actions">
@@ -76,21 +56,4 @@
     </div>
   </div>
 </figure>
-{%- endmacro %}
-
-{% macro legal_document(title, effective_line) -%}
-<div class="container legal-layout">
-  <nav class="legal-nav" aria-label="Legal">
-    {% for legal_page, legal_label in [("privacy", "Privacy policy"), ("terms", "Terms of service"), ("refunds", "Refund policy"), ("contact", "Contact")] %}
-    <a href="{{ url_for('pages.' ~ legal_page) }}"{% if page == legal_page %} aria-current="page"{% endif %}>{{ legal_label }}</a>
-    {% endfor %}
-  </nav>
-  <article class="legal">
-    <header class="legal-heading">
-      <h1>{{ title }}</h1>
-      <span class="muted">{{ effective_line }}</span>
-    </header>
-    {{ caller() }}
-  </article>
-</div>
 {%- endmacro %}

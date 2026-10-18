@@ -1,46 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Security · Hisar{% endblock %}
-{% block description %}How Hisar encrypts your vaults, what our server can and can't see, and where the limits are.{% endblock %}
+{% block title %}Hisar security model{% endblock %}
+{% block description %}How Hisar encrypts your vaults, what a server operator can and can't see, and where the limits are.{% endblock %}
 {% block content %}
-<section class="container page-header">
+{% set repository_url = site.REPOSITORY_URL %}
+<section class="container container-medium page-header">
   <span class="eyebrow">Security model</span>
-  <h1 class="wide-title">Your keys are made on your devices. Our server only ever holds ciphertext.</h1>
-  <p class="lede">This page explains what Hisar protects, what our server can see, and where the limits are.</p>
+  <h1>Keys are made on your devices. The server only ever holds ciphertext.</h1>
+  <p class="lede">This page covers what Hisar protects, what a server operator can see, and where the limits are. The complete design, with every protocol detail, is in <a href="{{ repository_url }}/blob/main/docs/DESIGN.md"><code>docs/DESIGN.md</code></a>.</p>
 </section>
 
-<section class="container" aria-label="How keys flow">
-  <ol class="flow">
-    <li class="flow-step"><strong>On your device</strong><span>Master password + 128-bit Secret Key → Argon2id and HKDF → your account unlock key. It decrypts your keyset: a symmetric key, a hybrid post-quantum key pair and a signing key.</span></li>
-    <li class="flow-step"><strong>On the wire</strong><span>TLS, and sign-in with OPAQUE: the server never receives your password or anything it could guess it from without the Secret Key.</span></li>
-    <li class="flow-step"><strong>On api.tryhisar.com</strong><span>Encrypted items, encrypted vault keys wrapped to each member, and the metadata below. No keys to open them.</span></li>
+<section class="container container-medium" aria-label="How keys flow">
+  <ol class="key-flow">
+    <li class="key-flow-step"><span class="key-flow-number">1</span><strong>On your device</strong><span>Master password + 128-bit Secret Key → Argon2id and HKDF → your account unlock key. It decrypts your keyset: a symmetric key, a hybrid post-quantum key pair and a signing key.</span></li>
+    <li class="key-flow-step key-flow-step-alt"><span class="key-flow-number">2</span><strong>On the wire</strong><span>TLS, and sign-in with OPAQUE: the server never receives your password, or anything it could guess it from without the Secret Key.</span></li>
+    <li class="key-flow-step key-flow-step-server"><span class="key-flow-number">3</span><strong>On your server</strong><span>Encrypted items, vault keys wrapped to each member, and the metadata below. No key that opens any of it.</span></li>
   </ol>
 </section>
 
-<section class="container two-column ruled">
-  <div class="stack-tight">
-    <h2>What our server sees</h2>
-    <ul class="detail-list">
-      <li>Your email, and the emails you invite or share with</li>
+<section class="container container-medium two-column">
+  <div class="section">
+    <h2>What the server sees</h2>
+    <p>So does anyone who runs it, backs it up or breaks into it.</p>
+    <ul class="card-list">
+      <li>Account emails, and the emails people invite or share with</li>
       <li>Which accounts can open which vaults</li>
       <li>How many items a vault has, their sizes and when they change</li>
-      <li>Your devices, IP addresses and app versions</li>
+      <li>Devices, IP addresses and app versions</li>
       <li>For share links: who made one, its size, expiry, view limit, views, and the IPs that open it</li>
-      <li>Your plan and billing status</li>
     </ul>
   </div>
-  <div class="stack-tight">
+  <div class="section">
     <h2>What it never sees</h2>
-    <ul class="detail-list">
+    <p>These are encrypted before they leave your device.</p>
+    <ul class="card-list">
       <li>Passwords, notes, one-time code seeds, SSH private keys</li>
       <li>Item titles, URLs and vault names</li>
-      <li>Your master password or Secret Key</li>
+      <li>Master passwords and Secret Keys</li>
       <li>The key in a share link (it stays after the <code>#</code>)</li>
       <li>What you approved or denied on your iPhone</li>
     </ul>
   </div>
 </section>
 
-<section class="container ruled section-stack">
+<section class="container container-medium section">
   <h2>Cryptography</h2>
   <div class="table-scroll" tabindex="0" role="region" aria-label="Cryptographic primitives">
     <table class="data-table">
@@ -56,34 +58,38 @@
       </tbody>
     </table>
   </div>
-  <p class="muted">The hybrid KEM stays secure as long as either half holds, so recorded traffic and database copies stay safe against a future quantum computer.</p>
+  <p>The hybrid KEM stays secure as long as either half holds, so recorded traffic and database copies stay protected against a future quantum computer.</p>
 </section>
 
-<section class="container ruled section-stack">
+<section class="container container-medium section">
   <h2>Threat model</h2>
   <div class="table-scroll" tabindex="0" role="region" aria-label="Threat model">
-    <table class="data-table">
-      <thead><tr><th scope="col">If someone…</th><th scope="col">What happens</th></tr></thead>
+    <table class="data-table data-table-wide">
+      <thead><tr><th scope="col" class="threat-subject">If someone…</th><th scope="col">What happens</th></tr></thead>
       <tbody>
-        <tr><td>Copies our database</td><td>They get ciphertext. Guessing your password offline is impossible without your Secret Key.</td></tr>
-        <tr><td>Controls our server</td><td>They can withhold or delay sync and approvals, and see the metadata above. They can't read items, forge an approval or weaken your password stretching.</td></tr>
-        <tr><td>Watches the network</td><td>TLS and OPAQUE: nothing to learn, no one to impersonate.</td></tr>
-        <tr><td>Runs code on your unlocked Mac</td><td>Out of scope for any password manager. Hisar narrows it: every key use asks and names the app, and unsigned programs are flagged.</td></tr>
-        <tr><td>Is a coding agent you approved</td><td>It only sees vaults you made available. A command you approve has real values and could leak them; masking hides values in output, it isn't a sandbox. <code>get_secret</code> puts a value in the agent's transcript.</td></tr>
-        <tr><td>Steals your iPhone</td><td>It needs Face ID to approve, and an approval never unlocks your Mac. Sign the phone out from another of your devices.</td></tr>
+        <tr><td>Copies the server's database or a backup</td><td class="muted">They get ciphertext and metadata. Guessing a password offline is impossible without that user's Secret Key.</td></tr>
+        <tr><td>Controls the server, including its operator</td><td class="muted">They can withhold or delay sync and approvals, and see the metadata above. They can't read items, forge an approval or weaken password stretching.</td></tr>
+        <tr><td>Watches the network</td><td class="muted">TLS and OPAQUE: nothing to learn, no one to impersonate.</td></tr>
+        <tr><td>Runs code on your unlocked Mac</td><td class="muted">Out of scope for any password manager. Hisar narrows it: every key use asks and names the app, and unsigned programs are flagged.</td></tr>
+        <tr><td>Is a coding agent you approved</td><td class="muted">It only sees vaults you made available to agents. A command you approve has real values and could leak them; masking hides values in output, it isn't a sandbox.</td></tr>
+        <tr><td>Steals your iPhone</td><td class="muted">It needs Face ID to approve, and an approval never unlocks your Mac.</td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
-<section class="container two-column ruled section-last">
-  <div class="stack-tight">
+<section class="container container-medium security-notes">
+  <div class="card card-quiet">
     <h2>No recovery, by design</h2>
-    <p>We can't reset your master password or show your Secret Key. Print your Emergency Kit when you sign up, and keep a second device signed in.</p>
+    <p>No one can reset a master password or show a Secret Key, server operators included. Print the Emergency Kit and keep a second device signed in.</p>
   </div>
-  <div id="report" class="stack-tight">
+  <div class="card card-quiet">
+    <h2>Audits</h2>
+    <p>Hisar has not had an independent audit yet. Reviews of the design document are welcome as issues.</p>
+  </div>
+  <div id="report" class="card card-quiet">
     <h2>Report a vulnerability</h2>
-    <p>Email <a href="mailto:{{ site.SUPPORT_EMAIL }}?subject=Security%20report">{{ site.SUPPORT_EMAIL }}</a> with “Security report” in the subject. We'll confirm we received it, keep you posted on the fix, and credit you if you want. Please give us a chance to fix the problem before you publish it.</p>
+    <p>Email <a href="mailto:{{ site.SUPPORT_EMAIL }}?subject=Security%20report">{{ site.SUPPORT_EMAIL }}</a> or use GitHub's private vulnerability reporting, not a public issue. We reply within two working days and credit reporters who want it.</p>
   </div>
 </section>
 {% endblock %}
