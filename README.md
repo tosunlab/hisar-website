@@ -40,8 +40,10 @@ The container runs gunicorn on port 8000 as a non-root user.
 
 ## Release
 
-1. `git tag -a website-0.1.0 -m "notes" && git push origin website-0.1.0`: the `website-image` job pushes `reg.tryhisar.com/hisar/website:0.1.0` and `:sha-<commit>` (linux/amd64).
-2. Press **website-publish** in the tag's pipeline to point `:latest` and `:0.1` at it. A custom build (`website-0.1.0-test`) gets its own image tag and can't be published.
-3. On the server: set `HISAR_WEBSITE_VERSION` in `.env` (or keep `latest`), then `docker compose pull website && docker compose up -d website`.
+GitHub Actions (`.github/workflows/`): `ci.yml` runs ruff and pytest on every pull request and builds the image without pushing; `release.yml` and `publish.yml` push to the private GitHub Container Registry package `ghcr.io/tosunlab/hisar-website`.
 
-`website-*` tags are protected, because the registry password is a protected group variable.
+1. `git tag -a website-0.1.0 -m "notes" && git push origin website-0.1.0`: the "Release website image" workflow pushes `ghcr.io/tosunlab/hisar-website:0.1.0` and `:sha-<commit>` (linux/amd64).
+2. Run the Publish workflow with the tag (`gh workflow run publish.yml -f tag=website-0.1.0`) to point `:latest` and `:0.1` at it. A custom build (`website-0.1.0-test`) gets its own image tag and can't be published.
+3. On the server: `docker login ghcr.io -u <GitHub user>` with a token that has `read:packages`, set `HISAR_WEBSITE_VERSION` in `.env` (or keep `latest`), then `docker compose pull website && docker compose up -d website`.
+
+Anyone who can push a `website-*` tag or run a workflow can release, so protect `website-*` tags with a repository ruleset.
