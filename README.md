@@ -1,6 +1,6 @@
 # Hisar website
 
-The website at [tryhisar.com](https://tryhisar.com): a Flask app with Jinja templates.
+The website at [tryhisar.com](https://tryhisar.com) for the open-source, self-hosted Hisar: a Flask app with Jinja templates. Pages: home, download, security model and privacy.
 
 ## Develop
 
@@ -17,17 +17,15 @@ uv run ruff check . && uv run ruff format --check .
 |---|---|
 | `hisar_website/__init__.py` | `create_app()`: settings from the environment, security headers |
 | `hisar_website/pages.py` | One route per page (`ALL_PAGE`) and `/healthz` |
-| `hisar_website/templates/` | `base.html` layout, one template per page; `partials/` holds the header, footer and shared macros (buttons, code blocks, plan cards, the approval dialog, the legal page layout) |
-| `hisar_website/static/` | `css/site.css` (Hisar's colour tokens, light and dark), `js/pricing.js` (the monthly/yearly toggle) and the favicon |
+| `hisar_website/templates/` | `base.html` layout, one template per page; `partials/` holds the header, footer and shared macros (icons, buttons, code blocks, the approval dialog) |
+| `hisar_website/static/` | `css/site.css` (Hisar's colour tokens, light and dark), `fonts/` (IBM Plex Sans and Mono, latin subset, SIL Open Font License in `OFL.txt`) and the favicon |
 
 ## Settings
 
 | Variable | Default |
 |---|---|
 | `HISAR_SUPPORT_EMAIL` | `support@tryhisar.com` |
-| `HISAR_APP_URL` | `https://api.tryhisar.com` |
-| `HISAR_PRO_MONTHLY_PRICE` | `€2.49` |
-| `HISAR_PRO_YEARLY_PRICE` | `€19.99` |
+| `HISAR_REPOSITORY_URL` | `https://github.com/tosunlab/hisar`: the source, docs, releases and issues links |
 
 ## Run the image
 

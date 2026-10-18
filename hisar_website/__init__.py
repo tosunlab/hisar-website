@@ -9,9 +9,7 @@ def create_app(config: dict | None = None) -> Flask:
     app = Flask(__name__)
     app.config.update(
         SUPPORT_EMAIL=os.environ.get("HISAR_SUPPORT_EMAIL", "support@tryhisar.com"),
-        APP_URL=os.environ.get("HISAR_APP_URL", "https://api.tryhisar.com"),
-        PRO_MONTHLY_PRICE=os.environ.get("HISAR_PRO_MONTHLY_PRICE", "€2.49"),
-        PRO_YEARLY_PRICE=os.environ.get("HISAR_PRO_YEARLY_PRICE", "€19.99"),
+        REPOSITORY_URL=os.environ.get("HISAR_REPOSITORY_URL", "https://github.com/tosunlab/hisar").rstrip("/"),
     )
     if config:
         app.config.update(config)

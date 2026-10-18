@@ -8,19 +8,9 @@ from hisar_website import create_app
 from hisar_website.pages import ALL_PAGE
 
 ALL_PAGE_PATH = [path for path, _ in ALL_PAGE.values()]
-ALL_NAV_PATH = ["/features", "/security", "/pricing", "/download"]
-ALL_FOOTER_PATH = [
-    "/features",
-    "/pricing",
-    "/download",
-    "/status",
-    "/security",
-    "/privacy",
-    "/terms",
-    "/refunds",
-    "/contact",
-]
-ALL_LEGAL_PATH = ["/privacy", "/terms", "/refunds"]
+ALL_NAV_PATH = ["/security", "/download"]
+ALL_FOOTER_PATH = ["/security", "/privacy"]
+REPOSITORY_URL = "https://github.com/tosunlab/hisar"
 
 
 class PageParser(HTMLParser):
@@ -75,22 +65,23 @@ def get_body(client, path: str) -> str:
 @pytest.mark.parametrize("path", ALL_PAGE_PATH)
 def test_every_page_renders_with_navigation_and_footer(client, path):
     parser = parse_page(get_body(client, path))
-    for linked_path in ALL_NAV_PATH + ALL_FOOTER_PATH + ["/"]:
+    for linked_path in ["/", "/#features", "/#self-host"] + ALL_NAV_PATH + ALL_FOOTER_PATH:
         assert linked_path in parser.all_href, f"{path} misses a link to {linked_path}"
-    assert "mailto:support@tryhisar.com" in parser.all_href
+    for repository_link in (REPOSITORY_URL, f"{REPOSITORY_URL}/tree/main/docs", f"{REPOSITORY_URL}/releases"):
+        assert repository_link in parser.all_href, f"{path} misses a link to {repository_link}"
 
 
 @pytest.mark.parametrize("path", ALL_PAGE_PATH)
 def test_every_page_marks_its_navigation_link_as_current(client, path):
     body = get_body(client, path)
-    if path in ALL_NAV_PATH or path in ALL_LEGAL_PATH:
+    if path in ALL_NAV_PATH or path in ALL_FOOTER_PATH:
         assert f'href="{path}" aria-current="page"' in body
 
 
 @pytest.mark.parametrize("path", ALL_PAGE_PATH)
 def test_every_page_avoids_banned_wording(client, path):
     text = get_body(client, path).lower()
-    for banned_word in ("family", "self-hosted", "smoke test", "lorem"):
+    for banned_word in ("family", "smoke test", "lorem"):
         assert banned_word not in text, f"{path} contains {banned_word!r}"
 
 
@@ -142,11 +133,11 @@ def test_no_dead_internal_links(client):
     for target_path, fragment in all_checked_link:
         if fragment and fragment != "content":
             assert fragment in all_target_by_path[target_path].all_id, f"{target_path}#{fragment}"
-    assert len(all_target_by_path) >= len(ALL_PAGE_PATH) + 3
+    assert len(all_target_by_path) >= len(ALL_PAGE_PATH) + 2
 
 
 def test_external_links_are_only_known_hosts(client):
-    all_allowed_host = {"api.tryhisar.com", "autoriteitpersoonsgegevens.nl"}
+    all_allowed_host = {"github.com", "docs.github.com", "api.tryhisar.com"}
     for path in ALL_PAGE_PATH:
         for href in parse_page(get_body(client, path)).all_href:
             link = urlsplit(href)
@@ -156,90 +147,24 @@ def test_external_links_are_only_known_hosts(client):
                 assert link.scheme == "mailto", href
 
 
-def test_pricing_shows_configured_prices_with_yearly_default(client):
-    body = get_body(client, "/pricing")
-    assert "€2.49" in body
-    assert "€19.99" in body
-    assert 'data-billing-period="yearly" aria-pressed="true"' in body
-    assert 'data-billing-option="monthly" hidden' in body
-    assert "Coming later" in body
-    assert "Always free, on every plan" in body
-    assert "founding member" in body
-    assert "Lemon Squeezy, our reseller and merchant of record" in body
-    assert "/static/js/pricing.js" in body
-
-
-def test_prices_follow_settings():
-    app = create_app({"TESTING": True, "PRO_MONTHLY_PRICE": "€9.99", "PRO_YEARLY_PRICE": "€99.99"})
-    body = app.test_client().get("/pricing").get_data(as_text=True)
-    assert "€9.99" in body
-    assert "€99.99" in body
+def test_repository_links_follow_settings():
+    app = create_app({"TESTING": True, "REPOSITORY_URL": "https://git.example.com/fork/hisar"})
+    for path in ALL_PAGE_PATH:
+        body = app.test_client().get(path).get_data(as_text=True)
+        assert "https://git.example.com/fork/hisar/releases" in body, path
+        assert not re.search(re.escape(REPOSITORY_URL) + r"(?!-website)", body), path
 
 
 def test_support_email_follows_settings():
     app = create_app({"TESTING": True, "SUPPORT_EMAIL": "help@example.com"})
-    body = app.test_client().get("/contact").get_data(as_text=True)
-    assert "mailto:help@example.com" in body
+    body = app.test_client().get("/security").get_data(as_text=True)
+    assert "mailto:help@example.com?subject=Security%20report" in body
     assert "support@tryhisar.com" not in body
 
 
-def test_contact_offers_access_requests_and_security_reports(client):
-    body = get_body(client, "/contact")
-    assert 'id="request-access"' in body
-    assert "subject=Request%20access" in body
-    assert "subject=Security%20report" in body
-
-
-def test_download_is_for_invited_users(client):
-    body = get_body(client, "/download")
-    assert "invited users" in body
-    assert "TestFlight coming soon" in body
-    assert 'href="/contact#request-access"' in body
-
-
-def test_status_links_to_health_check_and_claims_nothing(client):
-    body = get_body(client, "/status")
-    assert 'href="https://api.tryhisar.com/healthz"' in body
-    assert "operational" not in body.lower()
-    assert "all systems" not in body.lower()
-
-
-@pytest.mark.parametrize("path", ALL_LEGAL_PATH)
-def test_legal_pages_name_the_operator_and_date(client, path):
-    body = get_body(client, path)
-    assert "Effective 11 October 2026" in body
-    assert "draft" not in body.lower()
-    assert 'aria-label="Legal"' in body
-
-
-def test_privacy_policy_names_processors_and_rights(client):
+def test_privacy_sends_hosted_server_users_to_its_own_policy(client):
     body = get_body(client, "/privacy")
-    for expected_text in (
-        "Alper Berber",
-        "Hetzner Online GmbH",
-        "Helsinki, Finland",
-        "Google",
-        "Data Privacy Framework",
-        "Lemon Squeezy, our reseller and merchant of record",
-        "Autoriteit Persoonsgegevens",
-        "14 days",
-        "30 days",
-        "portable",
-    ):
-        assert expected_text in body, expected_text
-
-
-def test_terms_state_law_notice_and_liability_cap(client):
-    body = get_body(client, "/terms")
-    for expected_text in ("Alper Berber", "law of the Netherlands", "60 days", "EUR 100", "merchant of record"):
-        assert expected_text in body, expected_text
-
-
-def test_refund_policy_covers_first_payment_only(client):
-    body = get_body(client, "/refunds")
-    assert "14 days of your first payment" in body
-    assert "Renewals" in body
-    assert "Lemon Squeezy, our reseller and merchant of record" in body
+    assert 'href="https://api.tryhisar.com/privacy"' in body
 
 
 def test_security_headers_are_set(client):

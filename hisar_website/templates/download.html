@@ -1,48 +1,81 @@
 {% extends "base.html" %}
-{% from "partials/components.html" import button, code_block, pill %}
-{% block title %}Download · Hisar{% endblock %}
-{% block description %}Hisar for Mac, the hisar command-line tool, the browser extension and the iPhone app.{% endblock %}
+{% from "partials/components.html" import button, code_block %}
+{% block title %}Download Hisar{% endblock %}
+{% block description %}Hisar for Mac, the hisar command-line tool, the browser extension, the iPhone app and the server image, from GitHub Releases.{% endblock %}
 {% block content %}
-{% set request_access_url = url_for('pages.contact') ~ '#request-access' %}
+{% set repository_url = site.REPOSITORY_URL %}
 <section class="container container-narrow page-header">
+  <span class="eyebrow">GitHub Releases · Mac, CLI, extension, server</span>
   <h1>Download Hisar</h1>
-  <p class="lede">Hisar is invite-only for now, so downloads are for invited users: your invitation email has the download link and the steps to create your account. Not invited yet? <a href="{{ request_access_url }}">Request access</a>.</p>
+  <p class="lede">The apps need a Hisar server to sign in to. <a href="{{ url_for('pages.home', _anchor='self-host') }}">Set one up first</a> if you haven't. Every file below comes from the <a href="{{ repository_url }}/releases">GitHub releases</a>.</p>
 </section>
 
-<section class="container container-narrow">
+<section class="container container-narrow download-section">
   <div class="download-hero">
-    <div class="stack-tight">
+    <div class="stack">
       <h2>Hisar for Mac</h2>
-      <p class="muted">macOS 12 or later. Notarization by Apple is on its way; until then, open it the first time with right-click → Open. Includes the command-line tool and the SSH agent; install it first.</p>
+      <p class="muted">The app, the SSH agent and the <code>hisar</code> command-line tool. macOS 12 or later, Apple silicon and Intel.</p>
       <div class="actions">
-        {{ button(request_access_url, 'Get the download link') }}
+        {{ button(repository_url ~ '/releases', 'Download .dmg', icon_name='download') }}
+        {{ button(repository_url ~ '/releases', 'Release notes', 'text') }}
       </div>
-      <span class="small muted">The .dmg link comes with your invitation.</span>
+      <span class="note">Not notarized yet: right-click Hisar → Open the first time.</span>
     </div>
-    <div class="stack-tight">
-      <span class="label">Homebrew {{ pill("Coming soon") }}</span>
-      {% call code_block("Homebrew install command, coming soon") -%}
-<span class="code-prompt">$</span> brew install --cask hisar
+    <div class="stack">
+      <span class="label">After installing</span>
+      {% call code_block("Install the command-line tool from the Mac app") -%}
+<span class="code-comment"># Settings → Developer tools → Install command-line tool</span>
+<span class="code-prompt">$</span> hisar --version
       {%- endcall %}
-      <span class="small muted">Not published yet. Until it is, use the .dmg from your invitation.</span>
     </div>
   </div>
 </section>
 
-<section class="container container-narrow card-grid download-grid">
-  <article class="info-card">
+<section class="container container-narrow download-options">
+  <article class="card">
     <h2>Command-line tool</h2>
-    <p class="muted">On a Mac, the app installs <code>hisar</code> for you: Settings → Developer tools → Install command-line tool.</p>
-    <p class="muted">A standalone <code>hisar</code> for Linux, Windows, servers and CI is coming soon.</p>
+    <p>The standalone <code>hisar</code> for Linux, Windows, servers and CI. It signs in to your server on its own.</p>
+    <ul class="link-list">
+      <li><a href="{{ repository_url }}/releases">Linux amd64 / arm64 (.tar.gz)</a></li>
+      <li><a href="{{ repository_url }}/releases">macOS (.tar.gz)</a></li>
+      <li><a href="{{ repository_url }}/releases">Windows amd64 (.zip)</a></li>
+    </ul>
   </article>
-  <article class="info-card">
-    <h2>Browser extension {{ pill("Coming soon") }}</h2>
-    <p class="muted">Fills logins in Chrome and other Chromium browsers. It talks to the Mac app, so install that first. The store listing isn't public yet.</p>
+  <article class="card">
+    <h2>Browser extension</h2>
+    <p>Fills logins in Chrome, Arc, Brave and Edge. It talks to the Mac app, so install that first.</p>
+    {{ button(repository_url ~ '/releases', 'Download .zip', 'secondary', 'medium') }}
   </article>
-  <article class="info-card">
-    <h2>iPhone {{ pill("TestFlight coming soon") }}</h2>
-    <p class="muted">Your vaults, AutoFill, and approvals for requests from your Mac. Invited users get a TestFlight link by email when the beta opens.</p>
-    <span class="small muted">iOS 17 or later</span>
+  <article class="card">
+    <h2>iPhone</h2>
+    <p>Your vaults, and approvals for requests from your Mac. There's no App Store build yet; build it with Xcode and install it on your own phone.</p>
+    <a class="strong-link" href="{{ repository_url }}/tree/main/mobile/ios">iPhone build instructions</a>
   </article>
+  <article class="card">
+    <h2>Server</h2>
+    <p>A container image for Linux, amd64 and arm64.</p>
+    {% call code_block("Pull the server image", "light", compact=True) -%}
+docker pull ghcr.io/tosunlab/hisar-server:latest
+    {%- endcall %}
+    <a class="strong-link" href="{{ repository_url }}/blob/main/deploy/README.md">Server configuration</a>
+  </article>
+</section>
+
+<section class="container container-narrow download-checks">
+  <div class="card card-quiet">
+    <h2>Check your download</h2>
+    <p>Each command-line release has a <code>SHA256SUMS</code> file. Download it next to your files and run:</p>
+    {% call code_block("Verify checksums", compact=True) -%}
+<span class="code-prompt">$</span> shasum -a 256 -c SHA256SUMS --ignore-missing
+    {%- endcall %}
+  </div>
+  <div class="card card-quiet">
+    <h2>Build from source</h2>
+    <p>Every app and the server build from the same repository. You'll need Go 1.26 or later, Node 24 and, for the iPhone app, Xcode.</p>
+    {% call code_block("Build from source", compact=True) -%}
+<span class="code-prompt">$</span> git clone {{ repository_url }}
+<span class="code-prompt">$</span> cd hisar &amp;&amp; make build
+      {%- endcall %}
+  </div>
 </section>
 {% endblock %}

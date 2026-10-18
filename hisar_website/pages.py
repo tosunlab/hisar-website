@@ -4,15 +4,9 @@ pages = Blueprint("pages", __name__)
 
 ALL_PAGE = {
     "home": ("/", "home.html"),
-    "features": ("/features", "features.html"),
-    "pricing": ("/pricing", "pricing.html"),
-    "security": ("/security", "security.html"),
     "download": ("/download", "download.html"),
-    "status": ("/status", "status.html"),
-    "contact": ("/contact", "contact.html"),
-    "terms": ("/terms", "terms.html"),
+    "security": ("/security", "security.html"),
     "privacy": ("/privacy", "privacy.html"),
-    "refunds": ("/refunds", "refunds.html"),
 }
 
 
