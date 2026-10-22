@@ -137,7 +137,7 @@ def test_no_dead_internal_links(client):
 
 
 def test_external_links_are_only_known_hosts(client):
-    all_allowed_host = {"github.com", "docs.github.com", "api.tryhisar.com"}
+    all_allowed_host = {"github.com", "docs.github.com", "api.tryhisar.com", "tosunlab.com"}
     for path in ALL_PAGE_PATH:
         for href in parse_page(get_body(client, path)).all_href:
             link = urlsplit(href)
@@ -165,6 +165,13 @@ def test_support_email_follows_settings():
 def test_privacy_sends_hosted_server_users_to_its_own_policy(client):
     body = get_body(client, "/privacy")
     assert 'href="https://api.tryhisar.com/privacy"' in body
+
+
+@pytest.mark.parametrize("path", ALL_PAGE_PATH)
+def test_every_page_credits_tosunlab(client, path):
+    body = get_body(client, path)
+    assert 'href="https://tosunlab.com"' in body
+    assert "Alper" not in body
 
 
 def test_security_headers_are_set(client):
