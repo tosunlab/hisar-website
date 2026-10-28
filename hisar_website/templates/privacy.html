@@ -18,7 +18,7 @@
 
   <section class="section">
     <h2>Who is responsible</h2>
-    <p><a href="https://tosunlab.com">tosunlab</a>, in the Netherlands, develops Hisar and runs this website. The hosted service at <code>eu.tryhisar.com</code> is operated by Alper Berber, the controller of its personal data. Its <a href="https://eu.tryhisar.com/privacy">full privacy policy</a> explains the service's records, purposes, retention and your rights. Contact {{ support_email_link }} for product, website or hosted-service privacy questions.</p>
+    <p><a href="https://tosunlab.com">tosunlab</a>, in the Netherlands, develops Hisar, runs this website and operates the hosted service at <code>eu.tryhisar.com</code>. Its <a href="https://eu.tryhisar.com/privacy">full privacy policy</a> explains the service's records, purposes and retention. Contact {{ support_email_link }} for product, website or hosted-service privacy questions.</p>
     <p>If you use a self-hosted server, its operator is responsible for account administration, hosting, logs, backups and its privacy notice. The hosted-service providers and retention periods below do not describe every self-hosted installation.</p>
   </section>
 
@@ -33,14 +33,16 @@
     <h2>Hosting, email and international transfers</h2>
     <p>Our hosted service uses Amazon Web Services (AWS) for hosting, its database and backups in Frankfurt, Germany (<code>eu-central-1</code>), with backup copies in Stockholm, Sweden (<code>eu-north-1</code>).</p>
     <p>Cloudflare proxies <code>eu.tryhisar.com</code> and <code>push.tryhisar.com</code> and provides DDoS protection. It terminates TLS at its edge and can see IP addresses, request metadata, session tokens and other unencrypted service data in transit. Vault contents remain end-to-end encrypted in those requests. Cloudflare Email Service delivers transactional emails and processes recipients' addresses and message contents. These emails are not end-to-end encrypted and do not contain vault contents. Apple delivers iPhone notifications.</p>
-    <p>AWS, Cloudflare and Apple are US-based providers. EU database storage does not mean all processing stays in the EU: Cloudflare may handle requests at data centers outside the EU, and our proxy is not restricted to EU locations. For covered transfers, AWS and Cloudflare use the EU–US Data Privacy Framework, with Standard Contractual Clauses as fallback; UK safeguards include the UK extension or UK Addendum where applicable. Apple describes Standard Contractual Clauses for European and UK transfers in its privacy policy. See the <a href="https://eu.tryhisar.com/privacy#transfers">hosted-service policy</a> for provider links and how to request information about safeguards.</p>
+    <p>AWS, Cloudflare and Apple are US-based providers. EU database storage does not mean all processing stays in the EU: Cloudflare may handle requests at data centers outside the EU, and our proxy is not restricted to EU locations. For covered transfers, AWS and Cloudflare use the EU–US Data Privacy Framework, with Standard Contractual Clauses as fallback. See the <a href="https://eu.tryhisar.com/privacy#transfers">hosted-service policy</a> for provider links and how to request information about safeguards.</p>
   </section>
 
   <section class="section" id="notifications">
     <h2>Notifications</h2>
+    <p>If you use Hisar's own server at <code>eu.tryhisar.com</code>, we handle notification registrations and use our relay at <code>push.tryhisar.com</code> for iPhone notifications. If you use a self-hosted server, its operator handles registrations and chooses the iPhone relay. Self-hosted servers use Hisar's relay by default, so using your own account server does not by itself keep notification traffic away from Hisar.</p>
     <p>When you enable notifications, your server stores the phone's relay handle (iPhone) or Web Push address and subscription keys (Android), along with the notification types you choose. Turning off all notification types in Hisar removes the phone's notification registration from the server when the change reaches it. This does not itself revoke Apple's push token or unregister your Android UnifiedPush distributor.</p>
-    <p>For iPhone notifications, Hisar's relay processes the Apple push token, notification type and time; Apple also sees the type and timing for that token. Additional details, such as the sender of a sharing invitation, are encrypted to the phone. Push messages do not include vault contents or the contents of approval requests. Approval details are retrieved separately through your server, end-to-end encrypted. The relay and its network proxy also process connection information, including IP addresses.</p>
+    <p>When your iPhone uses Hisar's relay, the relay processes the Apple push token, notification type and time; Apple also sees the type and timing for that token. Additional details, such as the sender of a sharing invitation, are encrypted to the phone. Push messages do not include vault contents or the contents of approval requests. Approval details are retrieved separately through your server, end-to-end encrypted. The relay and its network proxy also process connection information, including IP addresses.</p>
     <p>On Android, your server sends encrypted Web Push messages to the UnifiedPush service you choose. That service can see arrival times, message sizes and the notification type in the HTTP <code>Topic</code> header, but cannot decrypt the message body. Hisar does not use Firebase for these notifications.</p>
+    <p>You can run your own iPhone relay, but using your own Apple push credentials requires an iPhone app you build and sign yourself. On Android, you can use a self-hosted UnifiedPush provider reachable over public HTTPS. See the <a href="{{ site.REPOSITORY_URL }}/blob/main/docs/docs/self-hosting.md#push-notifications">self-hosting instructions</a> for the configuration and limits.</p>
   </section>
 
   <section class="section">
@@ -68,10 +70,10 @@
   </section>
 
   <section class="section">
-    <h2>Your rights and choices</h2>
+    <h2>Privacy questions</h2>
     <p>We process hosted account data to provide the service under our contract with you. Website security logs and support handling rely on legitimate interests in operating a secure service and answering requests; applicable legal obligations may also require retention. The <a href="https://eu.tryhisar.com/privacy">hosted-service policy</a> gives the detailed legal bases.</p>
-    <p>Under applicable EU or UK data protection law, you can request access, correction, erasure, restriction or portability of your personal data, and object to processing based on legitimate interests. Email {{ support_email_link }} for data we control, or your own server's operator for a self-hosted account. We may verify your identity without asking for your master password or Secret Key.</p>
-    <p>You can complain to the Dutch <a href="https://autoriteitpersoonsgegevens.nl">Autoriteit Persoonsgegevens</a>, your local EU supervisory authority, or the UK's <a href="https://ico.org.uk/make-a-complaint/">Information Commissioner's Office (ICO)</a>. Hisar is not intended for children under 16.</p>
+    <p>Email {{ support_email_link }} for data we control, or your own server's operator for a self-hosted account. We may verify your identity without asking for your master password or Secret Key.</p>
+    <p>Hisar is not intended for children under 16.</p>
   </section>
 
   <section class="section">

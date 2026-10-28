@@ -129,8 +129,6 @@ def test_external_links_are_only_known_hosts(client):
         "docs.github.com",
         "eu.tryhisar.com",
         "tosunlab.com",
-        "autoriteitpersoonsgegevens.nl",
-        "ico.org.uk",
     }
     for path in ALL_PAGE_PATH:
         for href in parse_page(get_body(client, path)).all_href:
