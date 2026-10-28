@@ -1,6 +1,6 @@
 # Hisar website
 
-The website at [tryhisar.com](https://tryhisar.com) for the open-source, self-hosted Hisar: a Flask app with Jinja templates. Pages: home, download, security model and privacy.
+The website at [tryhisar.com](https://tryhisar.com) for Hisar: a Flask app with Jinja templates. Pages: home, download, security model, privacy and contact/support.
 
 ## Develop
 
@@ -26,6 +26,10 @@ uv run ruff check . && uv run ruff format --check .
 |---|---|
 | `HISAR_SUPPORT_EMAIL` | `support@tryhisar.com` |
 | `HISAR_REPOSITORY_URL` | `https://github.com/tosunlab/hisar`: the source, docs, releases and issues links |
+
+`/contact` is the public App Store Support URL. It must work without authentication and provide the configured support email. `/privacy` covers the website and apps and links to the hosted service's full policy at `https://eu.tryhisar.com/privacy`. Keep provider, retention and contact disclosures aligned with that policy; self-hosted operators remain responsible for their own notices.
+
+After deploying a release, check `https://tryhisar.com/contact` and `/privacy` without signing in before asking App Review to check again. A merged PR or a built image alone does not update the live Support URL.
 
 ## Run the image
 

@@ -7,6 +7,7 @@ ALL_PAGE = {
     "download": ("/download", "download.html"),
     "security": ("/security", "security.html"),
     "privacy": ("/privacy", "privacy.html"),
+    "contact": ("/contact", "contact.html"),
 }
 
 
